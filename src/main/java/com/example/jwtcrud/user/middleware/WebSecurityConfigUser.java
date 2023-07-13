@@ -2,6 +2,8 @@ package com.example.jwtcrud.user.middleware;
 
 import com.example.jwtcrud.security.middleware.JwtAuthenticationEntryPointUser;
 import com.example.jwtcrud.user.domain.service.UserService;
+import com.example.jwtcrud.vendors.domain.service.VendorService;
+import com.example.jwtcrud.vendors.middleware.JwtAuthorizationFilterVendor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +27,9 @@ public class WebSecurityConfigUser extends WebSecurityConfigurerAdapter {
     UserService userService;
 
     @Autowired
+    VendorService vendorService;
+
+    @Autowired
     JwtAuthenticationEntryPointUser unauthorizedHandler;
 
     @Bean
@@ -32,9 +37,15 @@ public class WebSecurityConfigUser extends WebSecurityConfigurerAdapter {
         return new JwtAuthorizationFilterUser();
     }
 
+    @Bean
+    public JwtAuthorizationFilterVendor authorizationFilterVendor() {
+        return new JwtAuthorizationFilterVendor();
+    }
+
     @Override
     public void configure(AuthenticationManagerBuilder builder) throws Exception {
         builder.userDetailsService(userService);
+        builder.userDetailsService(vendorService);
     }
 
     @Bean
@@ -55,7 +66,7 @@ public class WebSecurityConfigUser extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                .antMatchers("/api/v1/users/auth/**", "/api/v1/users", "/swagger-ui/**", "/v2/api-docs/**", "/swagger-resources/**", "/configuration/**").permitAll()
+                .antMatchers("/api/v1/users/auth/**", "/api/v1/vendors/auth/**", "/api/v1/users", "/api/v1/vendors", "/swagger-ui/**", "/v2/api-docs/**", "/swagger-resources/**", "/configuration/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authorizationFilterUser(), UsernamePasswordAuthenticationFilter.class);
